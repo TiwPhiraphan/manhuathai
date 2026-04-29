@@ -196,10 +196,12 @@ class EmbeddedHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         self.directory = str(Path('viewer').resolve())
         super().__init__(*args, **kwargs)
+
     def do_GET(self):
         if self.path == '/' or self.path == '/index.html' or self.path.startswith('/index.html?'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html; charset=utf-8')
+            self.send_header('Cache-Control', 'no-store')
             self.end_headers()
             self.wfile.write(INDEX_HTML.encode('utf-8'))
             return
@@ -213,16 +215,26 @@ class EmbeddedHandler(http.server.SimpleHTTPRequestHandler):
         if self.path == '/library.html':
             self.send_response(200)
             self.send_header('Content-type', 'text/html; charset=utf-8')
+            self.send_header('Cache-Control', 'no-store')
             self.end_headers()
             self.wfile.write(LIBRARY_HTML.encode('utf-8'))
             return
         if self.path == '/database.json' or self.path.startswith('/images/'):
+            if self.path == '/database.json':
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Cache-Control', 'no-store')
+                self.end_headers()
+                with open(Path('viewer') / 'database.json', 'rb') as f:
+                    self.wfile.write(f.read())
+                return
             super().do_GET()
             return
         self.send_response(200)
         self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
         self.wfile.write(INDEX_HTML.encode('utf-8'))
+
     def log_message(self, format, *args):
         pass
 
