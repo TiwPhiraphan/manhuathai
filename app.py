@@ -212,17 +212,68 @@ class EmbeddedHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
+def kill_port(port: int) -> None:
+    """Kill process using given port via /proc/net/tcp (no root needed)."""
+    import signal, time
+
+    def _hex_port(p):
+        return f'{p:04X}'
+
+    try:
+        target_hex = _hex_port(port)
+        inode_set = set()
+
+        for tcp_file in ('/proc/net/tcp', '/proc/net/tcp6'):
+            try:
+                with open(tcp_file, 'r') as f:
+                    for line in f.readlines()[1:]:
+                        parts = line.split()
+                        if len(parts) < 10:
+                            continue
+                        local_port_hex = parts[1].split(':')[1]
+                        if local_port_hex.upper() == target_hex:
+                            inode_set.add(parts[9])
+            except (PermissionError, FileNotFoundError):
+                continue
+
+        if not inode_set:
+            return
+
+        for pid_str in os.listdir('/proc'):
+            if not pid_str.isdigit():
+                continue
+            fd_dir = f'/proc/{pid_str}/fd'
+            try:
+                for fd in os.listdir(fd_dir):
+                    try:
+                        link = os.readlink(f'{fd_dir}/{fd}')
+                        if link.startswith('socket:[') and link[8:-1] in inode_set:
+                            os.kill(int(pid_str), signal.SIGTERM)
+                            time.sleep(0.5)
+                            return
+                    except (PermissionError, FileNotFoundError, OSError):
+                        continue
+            except (PermissionError, FileNotFoundError):
+                continue
+    except Exception:
+        pass
+
+class ReusableHTTPServer(http.server.HTTPServer):
+    allow_reuse_address = True
+
 def start_server() -> None:
     viewer_dir = Path('viewer')
     viewer_dir.mkdir(exist_ok=True)
     os.chdir(viewer_dir)
-    server = http.server.HTTPServer(('', PORT), EmbeddedHandler)
+    kill_port(PORT)
+    server = ReusableHTTPServer(('', PORT), EmbeddedHandler)
     print(f'\nServer running at http://localhost:{PORT}')
     print('   Press Ctrl+C to stop\n')
     webbrowser.open(f'http://localhost:{PORT}/library.html')
     try:
         server.serve_forever()
     except KeyboardInterrupt:
+        server.server_close()
         print('\nServer stopped.')
 
 def menu() -> None:
