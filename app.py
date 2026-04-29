@@ -194,7 +194,7 @@ def download_manga(manga_url: str) -> None:
 
 class EmbeddedHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        self.directory = str(Path('viewer').resolve())
+        self.directory = VIEWER_DIR
         super().__init__(*args, **kwargs)
 
     def do_GET(self):
@@ -225,7 +225,7 @@ class EmbeddedHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json')
                 self.send_header('Cache-Control', 'no-store')
                 self.end_headers()
-                with open(Path('viewer') / 'database.json', 'rb') as f:
+                with open(DB_PATH, 'rb') as f:
                     self.wfile.write(f.read())
                 return
             super().do_GET()
@@ -288,7 +288,7 @@ class ReusableHTTPServer(http.server.HTTPServer):
     allow_reuse_address = True
 
 def start_server() -> None:
-    viewer_dir = Path('viewer')
+    viewer_dir = VIEWER_DIR
     viewer_dir.mkdir(exist_ok=True)
     os.chdir(viewer_dir)
     kill_port(PORT)
