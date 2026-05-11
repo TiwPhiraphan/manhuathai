@@ -86,13 +86,19 @@ viewer/database.json
 ### Install PyInstaller
 
 ```
-pip install pyinstaller
+pip install pyinstaller pyinstaller-hooks-contrib
 ```
 
 ### Build
 
+### Install `pyinstaller`
 ```
-pyinstaller --onefile --noconsole app.py
+pip install pyinstaller
+```
+
+### Build with python
+```
+python build.py
 ```
 
 ### Output

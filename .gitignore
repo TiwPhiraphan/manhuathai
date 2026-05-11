@@ -3,5 +3,6 @@ __pycache__/
 dist/
 build/
 *.spec
+.venv
 viewer/images/
 viewer/database.json

@@ -1,9 +1,13 @@
-import re, ast, sys, string, base64, requests, json, os, subprocess, http.server, webbrowser
+import re, ast, sys, string, base64, asyncio, requests, json, os, subprocess, http.server, webbrowser
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from bs4 import BeautifulSoup
 from io import BytesIO
 from PIL import Image
 from pathlib import Path
+from pyclack.prompts import intro, outro
+from pyclack.prompts.text import text
+from pyclack.prompts.select import select
+from pyclack.core import Option
 
 print("\033]0;Manhuathai Offline Reader\007", end="")
 
@@ -302,36 +306,37 @@ def start_server() -> None:
         server.server_close()
         print('\nServer stopped.')
 
-def menu() -> None:
-    print('+---------------------------------+')
-    print('|      Manga Offline Reader       |')
-    print('+---------------------------------+')
-    print('|  1.  Download / Update Manga    |')
-    print('|  2.  Start Read (offline)       |')
-    print('|  0.  Exit                       |')
-    print('+---------------------------------+')
-    choice = input('\nSelect: ').strip()
-    if choice == '1':
-        url = input(f'\nManhuathai URL: ').strip()
-        if not url:
-            main()
-        else:
-            download_manga(url)
-            input('\nPress Enter to return to menu...')
-            main()
-    elif choice == '2':
+async def menu_async() -> None:
+    intro('Manga Offline Reader')
+    choice = await select(
+        'Select progress:',
+        options=[
+            Option('download', 'Download / Update Manga'),
+            Option('read',     'Start Read (offline)'),
+            Option('exit',     'Exit'),
+        ]
+    )
+    if choice == 'download':
+        url = await text(
+            'Manhuathai URL:',
+            placeholder='https://www.manhuathai.com/manga/...',
+            validate=lambda v: 'Please type URL' if not v.strip() else None
+        )
+        outro('')
+        download_manga(url.strip())
+        await menu_async()
+    elif choice == 'read':
         db = load_db()
         if not db:
-            print('\n[ERROR] No data found. Please download first.')
-            input('Press Enter to return to menu...')
-            main()
+            outro('[ERROR] No data found. Please download first.')
         else:
+            outro('Starting server...')
             start_server()
-    elif choice == '0':
-        print('\nBye!')
     else:
-        print('\n[ERROR] Invalid choice.')
-        main()
+        outro('Bye!')
+
+def menu() -> None:
+    asyncio.run(menu_async())
 
 def main():
     subprocess.run('cls' if os.name == 'nt' else 'clear', shell=True)
