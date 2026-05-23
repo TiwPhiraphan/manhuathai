@@ -1,0 +1,20 @@
+[
+    {
+        "domain": "https://www.manhuathai.com",
+        "selector": {
+            "title": "div.post-title h1",
+            "thumbnail": "div.summary_image img[data-src]",
+            "list": "ul.main *li.wp-manga-chapter a[href]",
+            "tags": "div.reading-content div.text-center *"
+        }
+    },
+    {
+        "domain": "https://www.xn--l3c0azab5a2gta.com",
+        "selector": {
+            "title": "h1.entry-title",
+            "thumbnail": "div.thumb img[src]",
+            "list": "ul.clstyle li a[href]",
+            "tags": "div#readerarea *"
+        }
+    }
+]
