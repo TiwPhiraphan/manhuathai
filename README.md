@@ -9,8 +9,8 @@ A lightweight offline manga reader with a built-in local web server.
 ### 1. Clone the repository
 
 ```
-git clone https://github.com/TiwPhiraphan/manhuathai-offline-reader.git
-cd manhuathai-offline-reader
+git clone https://github.com/TiwPhiraphan/manhuathai.git
+cd manhuathai
 ```
 
 ---
