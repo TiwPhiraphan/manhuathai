@@ -53,7 +53,7 @@ viewer/images/
 - Metadata is stored in:
 
 ```
-viewer/database.json
+viewer/application.json
 ```
 
 - The browser UI loads data from the local server
@@ -75,7 +75,7 @@ viewer/database.json
 .
 ├── app.py
 ├── viewer/
-│   ├── database.json
+│   ├── application.json
 │   └── images/
 ```
 
