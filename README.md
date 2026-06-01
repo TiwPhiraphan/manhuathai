@@ -36,7 +36,7 @@ python app.py
 Go to:
 
 ```
-http://localhost:8080
+http://localhost
 ```
 
 ---
