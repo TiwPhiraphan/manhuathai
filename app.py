@@ -25,8 +25,8 @@ VIEWER_DIR = BASE_DIR / 'viewer'
 DB_PATH = VIEWER_DIR / 'database.json'
 IMG_BASE = VIEWER_DIR / 'images'
 PREFIX_PATH = BASE_DIR / 'prefix.json'
-MAX_TIMEOUT=(30, 300)
-MAX_WORKER=10
+MAX_TIMEOUT = (10, 240)
+MAX_WORKER = 8
 PORT = 80
 
 def load_prefix() -> list[dict]:
