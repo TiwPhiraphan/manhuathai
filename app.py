@@ -25,6 +25,7 @@ VIEWER_DIR = BASE_DIR / 'viewer'
 DB_PATH = VIEWER_DIR / 'database.json'
 IMG_BASE = VIEWER_DIR / 'images'
 PREFIX_PATH = BASE_DIR / 'prefix.json'
+MAX_TIMEOUT=(30, 300)
 MAX_WORKER=10
 PORT = 80
 
@@ -65,7 +66,7 @@ def getContentHtml(url: str) -> BeautifulSoup | None:
         response = session.get(url, headers={
             'User-Agent': user_agent,
             'Referer': url
-        })
+        }, timeout=MAX_TIMEOUT)
         return BeautifulSoup(response.text, 'lxml') if response.status_code == 200 else None
     except:
         return None
@@ -80,7 +81,7 @@ def decodePattern(p: str, value: list[str]) -> str:
     return re.sub(r'\w+', replacer, p)
 
 def stitch_image(url: str, referer: str, pattern: list[list[str]], output_path: Path) -> None:
-    res = session.get(url, headers={'User-Agent': user_agent, 'Referer': referer})
+    res = session.get(url, headers={'User-Agent': user_agent, 'Referer': referer}, timeout=MAX_TIMEOUT)
     img = Image.open(BytesIO(res.content))
     xs = sorted(set(int(float(p[0])) for p in pattern))
     ys = sorted(set(int(float(p[1])) for p in pattern))
@@ -97,7 +98,7 @@ def stitch_image(url: str, referer: str, pattern: list[list[str]], output_path: 
     canvas.save(str(output_path))
 
 def download_plain_image(url: str, referer: str, output_path: Path) -> None:
-    res = session.get(url, headers={'User-Agent': user_agent, 'Referer': referer})
+    res = session.get(url, headers={'User-Agent': user_agent, 'Referer': referer}, timeout=MAX_TIMEOUT)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'wb') as f:
         f.write(res.content)
